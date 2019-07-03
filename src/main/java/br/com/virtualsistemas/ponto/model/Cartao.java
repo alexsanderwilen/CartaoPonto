@@ -6,6 +6,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Date;
 
 @Setter
 @Getter
@@ -55,7 +56,7 @@ public class Cartao implements Serializable {
 
     @Column(name = "card_data_ponto")
     @JsonProperty(value = "data")
-    private String DataPonto;
+    private Date dataPonto;
 
     @Column(name = "card_hora_ponto")
     @JsonProperty(value = "hora")

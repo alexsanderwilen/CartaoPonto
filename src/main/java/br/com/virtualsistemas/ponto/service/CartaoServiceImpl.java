@@ -2,13 +2,17 @@ package br.com.virtualsistemas.ponto.service;
 
 import br.com.virtualsistemas.ponto.model.Cartao;
 import br.com.virtualsistemas.ponto.repository.CartaoRepository;
+import br.com.virtualsistemas.ponto.repository.filter.CartaoFilter;
 import com.google.cloud.vision.v1.*;
 import com.google.protobuf.ByteString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -18,7 +22,7 @@ public class CartaoServiceImpl implements CartaoService {
     private CartaoRepository cartaoRepository;
 
     @Override
-    public Cartao extrairDadosFoto(byte[] fotoCartao) {
+    public Cartao extrairDadosFotoCartao(byte[] fotoCartao) {
         try {
             ImageAnnotatorClient vision = ImageAnnotatorClient.create();
 
@@ -47,10 +51,21 @@ public class CartaoServiceImpl implements CartaoService {
             dadosCartao.setLocal(textoSeparado[6].substring(6, textoSeparado[6].length()));
             dadosCartao.setNome(textoSeparado[7].substring(5, textoSeparado[7].length()));
 
+
             if (textoSeparado[8].contains("PIS:")) {
                 String[] pisDataHora = textoSeparado[8].split(" ");
                 dadosCartao.setPis(pisDataHora[0].substring(4, pisDataHora[0].length()));
-                dadosCartao.setDataPonto(pisDataHora[1]);
+
+                SimpleDateFormat formato = new SimpleDateFormat("dd/MM/yyyy");
+                Date dataTemp = null;
+                try {
+                    dataTemp = formato.parse(pisDataHora[1]);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+
+                dadosCartao.setDataPonto(dataTemp);
                 dadosCartao.setHoraPonto(pisDataHora[2]);
             }
 
@@ -69,5 +84,10 @@ public class CartaoServiceImpl implements CartaoService {
     @Override
     public Cartao salvarCartao(Cartao cartao) {
         return cartaoRepository.save(cartao);
+    }
+
+    @Override
+    public List<Cartao> filtrar(CartaoFilter cartaoFilter) {
+        return cartaoRepository.filtrar(cartaoFilter);
     }
 }
